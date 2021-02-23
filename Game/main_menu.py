@@ -1,4 +1,5 @@
 import pygame as pg
+import os
 import sys
 from pygame.locals import *
 import display as d
@@ -20,7 +21,9 @@ def open_menu(screen):
     w, h = pg.display.get_surface().get_size()
 
     # Create the background for the menu
-    screen.fill(bg_color)
+    bg_img = os.getcwd() + '/assets/bg1.png'
+    bg_image = pg.image.load(bg_img).convert()
+    screen.blit(bg_image, (0, 0))
 
     start_button = pg.Rect(w/2 - b_w/2, h/2 - b_h/2 + 120, b_w, b_h)
     pg.draw.rect(screen, button_color, start_button)

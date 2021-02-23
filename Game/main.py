@@ -1,5 +1,6 @@
 import pygame as pg
 import sys
+import os
 from pygame.locals import *
 import display
 import game
@@ -11,7 +12,7 @@ pg.init()
 
 # Creates game window
 screen = pg.display.set_mode((800, 600))
-pg.display.set_caption('Game')
+pg.display.set_caption('Zombie Game')
 
 # Screen currently displayed
 # 'menu', 'instructions', 'game'
@@ -37,3 +38,4 @@ while True:
     # Game loop
     if screen_choice == 'game':
         game.play_game(screen)
+        screen_choice = 'menu'

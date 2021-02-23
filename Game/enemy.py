@@ -1,20 +1,20 @@
 import pygame as pg
 import math
-from display import rot_center
+import game
 
 width = 800
 height = 600
 pg.display.set_mode((width, height))
 
-p_img_scale = 0.3
+e_img_scale = 0.3
 
 
-class Player(pg.sprite.Sprite):
-    def __init__(self, name, x, y):
+class Enemy(pg.sprite.Sprite):
+    def __init__(self, name, x, y, p_x, p_y):
         pg.sprite.Sprite.__init__(self)
         self.image = pg.image.load(name).convert_alpha()
         w, h = self.image.get_size()
-        player_dimensions = (int(w * p_img_scale), int(h * p_img_scale))
+        player_dimensions = (int(w * e_img_scale), int(h * e_img_scale))
         self.image = pg.transform.scale(self.image, player_dimensions).convert_alpha()
         self.orig_img = self.image
         self.rect = self.image.get_rect()
@@ -23,16 +23,19 @@ class Player(pg.sprite.Sprite):
         self.pos = (self.x, self.y)
         self.rect.center = self.pos
         self.rot = 0
+        self.p_x = p_x
+        self.p_y = p_y
         self.health = 100
 
     def update(self):
-        self.handle_keys()
         self.pos = (self.x, self.y)
 
-        mouse_x, mouse_y = pg.mouse.get_pos()
-        player_x, player_y = self.pos
+        player_x, player_y = self.p_x, self.p_y
+        enemy_x, enemy_y = self.pos
 
-        dir_x, dir_y = mouse_x - player_x, mouse_y - player_y
+        self.move_to_player()
+
+        dir_x, dir_y = player_x - enemy_x, player_y - enemy_y
 
         self.rot = (180 / math.pi) * math.atan2(-dir_y, dir_x) + 7
 
@@ -40,15 +43,17 @@ class Player(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
-    def handle_keys(self):
-        key = pg.key.get_pressed()
-        dist = 3  # distance moved in 1 frame
-        from_wall = 42
-        if (key[pg.K_DOWN] or key[ord('s')]) and self.y <= height - from_wall:  # down key
+    def move_to_player(self):
+        dist = 1  # distance moved in 1 frame
+        if self.y < self.p_y:
             self.y += dist  # move down
-        elif (key[pg.K_UP] or key[ord('w')]) and self.y >= from_wall:  # up key
+        elif self.y > self.p_y:
             self.y -= dist  # move up
-        if (key[pg.K_RIGHT] or key[ord('d')]) and self.x <= width - from_wall:  # right key
+        if self.x < self.p_x:
             self.x += dist  # move right
-        elif (key[pg.K_LEFT] or key[ord('a')]) and self.x >= from_wall:  # left key
+        elif self.x > self.p_x:
             self.x -= dist  # move left
+
+    def set_player_pos(self, x, y):
+        self.p_x, self.p_y = x, y
+        return

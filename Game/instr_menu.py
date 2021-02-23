@@ -1,5 +1,6 @@
 import pygame as pg
 import sys
+import os
 from pygame.locals import *
 import display as d
 
@@ -20,10 +21,12 @@ def open_instr(screen):
     w, h = pg.display.get_surface().get_size()
 
     # Create the background
-    screen.fill(bg_color)
-    font = pg.font.SysFont('Corbel', 30)
-    text = font.render('Instructions', False, button_text_color)
-    screen.blit(text, (100, 100))
+    bg_img = os.getcwd() + '/assets/bg1.png'
+    bg_image = pg.image.load(bg_img).convert()
+    screen.blit(bg_image, (0, 0))
+    font = pg.font.SysFont('Corbel', 75)
+    text = font.render('DON\'T DIE!', False, (255, 75, 75))
+    screen.blit(text, (200, 200))
 
     back_button = pg.Rect((w * 3/4) - b_w/2, (h * 3/4) - b_h/2, b_w, b_h)
     pg.draw.rect(screen, button_color, back_button)
