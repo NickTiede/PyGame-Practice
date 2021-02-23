@@ -1,5 +1,6 @@
 import pygame as pg
 import math
+import os
 from display import rot_center
 
 width = 800
@@ -7,6 +8,7 @@ height = 600
 pg.display.set_mode((width, height))
 
 p_img_scale = 0.3
+player_firing_img = os.getcwd() + '/assets/pc_firing.png'
 
 
 class Player(pg.sprite.Sprite):
@@ -18,15 +20,18 @@ class Player(pg.sprite.Sprite):
         self.image = pg.transform.scale(self.image, player_dimensions).convert_alpha()
         self.orig_img = self.image
         self.rect = self.image.get_rect()
+        self.fire_img = pg.image.load(player_firing_img).convert_alpha()
+        self.fire_img = pg.transform.scale(self.fire_img, player_dimensions).convert_alpha()
         self.x = x
         self.y = y
         self.pos = (self.x, self.y)
         self.rect.center = self.pos
         self.rot = 0
         self.health = 100
-        self.ammo = 20
-        self.clip = 0
+        self.ammo = 10
+        self.clip = 10
         self.clip_size = 10
+        self.image_num = 0
 
     def update(self):
         self.handle_keys()
@@ -39,8 +44,15 @@ class Player(pg.sprite.Sprite):
 
         self.rot = (180 / math.pi) * math.atan2(-dir_y, dir_x) + 7
 
-        self.image = pg.transform.rotate(self.orig_img, self.rot).convert_alpha()
-        self.rect = self.image.get_rect()
+        if self.image_num == 0:
+            current_img = self.orig_img
+            self.image = pg.transform.rotate(current_img, self.rot).convert_alpha()
+            self.rect = self.image.get_rect()
+        elif self.image_num == 1:
+            current_img = self.fire_img
+            self.image = pg.transform.rotate(current_img, self.rot).convert_alpha()
+            self.rect = self.image.get_rect()
+
         self.rect.center = self.pos
 
     def handle_keys(self):

@@ -23,6 +23,7 @@ class Ammo(pg.sprite.Sprite):
         self.pos = (self.x, self.y)
         self.rect.center = self.pos
         self.rot = 0
+        self.gave_ammo = False
 
     def update(self):
         return

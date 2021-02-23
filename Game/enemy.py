@@ -1,5 +1,6 @@
 import pygame as pg
 import math
+import os
 import game
 
 width = 800
@@ -7,6 +8,8 @@ height = 600
 pg.display.set_mode((width, height))
 
 e_img_scale = 0.3
+
+enemy_hit_img = os.getcwd() + '/assets/enemy_hit.png'
 
 
 class Enemy(pg.sprite.Sprite):
@@ -18,6 +21,8 @@ class Enemy(pg.sprite.Sprite):
         self.image = pg.transform.scale(self.image, enemy_dimensions).convert_alpha()
         self.orig_img = self.image
         self.rect = self.image.get_rect()
+        self.hit_img = pg.image.load(enemy_hit_img).convert_alpha()
+        self.hit_img = pg.transform.scale(self.hit_img, enemy_dimensions).convert_alpha()
         self.x = x
         self.y = y
         self.pos = (self.x, self.y)
@@ -26,6 +31,7 @@ class Enemy(pg.sprite.Sprite):
         self.p_x = p_x
         self.p_y = p_y
         self.health = 100
+        self.image_num = 0
 
     def update(self):
         self.pos = (self.x, self.y)
@@ -39,12 +45,19 @@ class Enemy(pg.sprite.Sprite):
 
         self.rot = (180 / math.pi) * math.atan2(-dir_y, dir_x) + 7
 
-        self.image = pg.transform.rotate(self.orig_img, self.rot).convert_alpha()
-        self.rect = self.image.get_rect()
+        if self.image_num == 0:
+            current_img = self.orig_img
+            self.image = pg.transform.rotate(current_img, self.rot).convert_alpha()
+            self.rect = self.image.get_rect()
+        elif self.image_num == 1:
+            current_img = self.hit_img
+            self.image = pg.transform.rotate(current_img, self.rot).convert_alpha()
+            self.rect = self.image.get_rect()
+
         self.rect.center = self.pos
 
     def move_to_player(self):
-        dist = 1  # distance moved in 1 frame
+        dist = 2  # distance moved in 1 frame
         if self.y < self.p_y:
             self.y += dist  # move down
         elif self.y > self.p_y:
