@@ -14,8 +14,8 @@ class Enemy(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self)
         self.image = pg.image.load(name).convert_alpha()
         w, h = self.image.get_size()
-        player_dimensions = (int(w * e_img_scale), int(h * e_img_scale))
-        self.image = pg.transform.scale(self.image, player_dimensions).convert_alpha()
+        enemy_dimensions = (int(w * e_img_scale), int(h * e_img_scale))
+        self.image = pg.transform.scale(self.image, enemy_dimensions).convert_alpha()
         self.orig_img = self.image
         self.rect = self.image.get_rect()
         self.x = x

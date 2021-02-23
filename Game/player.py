@@ -24,6 +24,9 @@ class Player(pg.sprite.Sprite):
         self.rect.center = self.pos
         self.rot = 0
         self.health = 100
+        self.ammo = 20
+        self.clip = 0
+        self.clip_size = 10
 
     def update(self):
         self.handle_keys()
