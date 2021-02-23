@@ -11,16 +11,18 @@ import random
 width = 800
 height = 600
 
-text_color = (255, 75, 75)
+text_color = (200, 200, 200)
 text_font = 'arialblack'
-text_size = 40
+text_size = 35
 
 player_img = os.getcwd() + '/assets/survivor-idle_rifle_0.png'
 enemy_img = os.getcwd() + '/assets/skeleton-attack_0.png'
 ammo_img = os.getcwd() + '/assets/Ammo.png'
 bg_img = os.getcwd() + '/assets/bg1.png'
+ui_bg_img = os.getcwd() + '/assets/player_ui_bg.png'
 
 damage_dist = 20
+knife_dist = 40
 ammo_dist = 25
 ammo_amount = 10
 
@@ -28,6 +30,7 @@ ammo_amount = 10
 flash_time = 0.05
 hit_time = 0.07
 reload_time = 2
+knife_time = 0.5
 
 
 # Game loop
@@ -39,25 +42,36 @@ def play_game(screen):
     bg_image = pg.image.load(bg_img).convert()
     screen.blit(bg_image, (0, 0))
 
+    # Health Fade
+    health_surface = pg.Surface((width, height - 50), pg.SRCALPHA)
+    health_surface.fill((0, 0, 0, 0))
+    screen.blit(health_surface, (0, 0))
+
     # List of all sprites
     all_sprites_list = pg.sprite.Group()
 
     # Temporary creates ammo
-    a = Ammo(ammo_img, 100, 100, 'rifle', ammo_amount)
+    a = Ammo(ammo_img, -50, -50, 'rifle', ammo_amount)
     all_sprites_list.add(a)
 
     # Timer starts
     flash_start = timer()
     hit_start = timer()
     reload_start = 0
+    knife_start = 0
 
     # Creates player character
     pc = Player(player_img, width/2, height/2)
     all_sprites_list.add(pc)
+    p_health = pc.health
 
     # Creates enemy
-    e = Enemy(enemy_img, 50, 50, pc.x, pc.y)
+    e = Enemy(enemy_img, -50, -50, pc.x, pc.y)
     all_sprites_list.add(e)
+
+    # Player UI
+    ui_bg_image = pg.image.load(ui_bg_img).convert_alpha()
+    screen.blit(ui_bg_image, (0, height - 50))
 
     # Health display
     font = pg.font.SysFont(text_font, text_size)
@@ -67,7 +81,12 @@ def play_game(screen):
     # Ammo display
     font = pg.font.SysFont(text_font, text_size)
     ammo_text = font.render('Ammo: ' + str(pc.clip) + ' / ' + str(pc.ammo), False, text_color)
-    screen.blit(ammo_text, (width - 400, height - 50))
+    screen.blit(ammo_text, (255, height - 50))
+
+    # Health display
+    font = pg.font.SysFont(text_font, text_size)
+    points_text = font.render('Points: ' + str(pc.points), False, text_color)
+    screen.blit(points_text, (555, height - 50))
 
     while True:
         for event in pg.event.get():
@@ -75,9 +94,12 @@ def play_game(screen):
                 pg.quit()
                 sys.exit()
 
-            if event.type == KEYDOWN and pg.key.get_pressed()[pg.K_SPACE]:
+            # Reload
+            if event.type == KEYDOWN and pg.key.get_pressed()[ord('r')]:
                 if timer() - reload_start >= reload_time:
                     reload_start = timer()
+                    pc.image_num = 2
+                    pc.update()
                     ammo_loaded = pc.clip_size - pc.clip
                     if pc.ammo >= ammo_loaded:
                         pc.ammo -= ammo_loaded
@@ -85,7 +107,19 @@ def play_game(screen):
                     else:
                         pc.clip += pc.ammo
                         pc.ammo = 0
+            # Knife
+            if event.type == KEYDOWN and pg.key.get_pressed()[pg.K_SPACE]:
+                knife_start = timer()
+                pc.image_num = 3
+                pc.update()
 
+                if abs(e.x - pc.x) <= knife_dist and abs(e.y - pc.y) <= knife_dist:
+                    e.health -= 50
+                    hit_start = timer()
+                    e.image_num = 1
+                    e.update()
+
+            # Shoot
             if event.type == pg.MOUSEBUTTONUP:
                 pos = pg.mouse.get_pos()
 
@@ -106,8 +140,11 @@ def play_game(screen):
                             e.image_num = 1
                             e.update()
 
-        # Muzzle flash image
-        if timer() - flash_start >= flash_time:
+        # Normal player image if no muzzle flash, reload, or knife
+        flash_calc = timer() - flash_start >= flash_time
+        reload_calc = timer() - reload_start >= reload_time
+        knife_calc = timer() - knife_start >= knife_time
+        if flash_calc and reload_calc and knife_calc:
             pc.image_num = 0
 
         # Enemy hit image
@@ -116,6 +153,8 @@ def play_game(screen):
 
         # Enemy dies
         if e.health <= 0:
+            pc.points += 1
+
             all_sprites_list.remove(a)
             a = Ammo(ammo_img, e.x, e.y, 'rifle', ammo_amount)
             all_sprites_list.add(a)
@@ -145,12 +184,15 @@ def play_game(screen):
         screen.blit(health_text, (10, height - 50))
 
         # Ammo text updates
-        if timer() - reload_start < reload_time:
-            ammo_text = font.render('RELOADING', False, text_color)
-            screen.blit(ammo_text, (width - 350, height - 100))
-
         ammo_text = font.render('Ammo: ' + str(pc.clip) + ' / ' + str(pc.ammo), False, text_color)
-        screen.blit(ammo_text, (width - 400, height - 50))
+
+        if timer() - reload_start < reload_time:
+            ammo_text = font.render('Ammo: RLD', False, text_color)
+        screen.blit(ammo_text, (255, height - 50))
+
+        # Points text updates
+        points_text = font.render('Points: ' + str(pc.points), False, text_color)
+        screen.blit(points_text, (555, height - 50))
 
         # On death
         if pc.health <= 0:
@@ -163,6 +205,12 @@ def play_game(screen):
 
         # Redraws sprites
         all_sprites_list.draw(screen)
+
+        screen.blit(ui_bg_image, (0, height - 50))
+
+        # Health fade
+        health_surface.fill((0, 0, 0, 2 * (p_health - pc.health)))
+        screen.blit(health_surface, (0, 0))
 
         clock.tick(60)
 

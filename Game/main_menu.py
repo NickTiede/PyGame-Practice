@@ -12,7 +12,10 @@ button_text_size = 40
 
 # Button dimensions
 b_w = 200
-b_h = 50
+b_h = 43
+
+start_button_img = os.getcwd() + '/assets/start_button.png'
+controls_button_img = os.getcwd() + '/assets/controls_button.png'
 
 
 # Game loop
@@ -25,17 +28,13 @@ def open_menu(screen):
     bg_image = pg.image.load(bg_img).convert()
     screen.blit(bg_image, (0, 0))
 
-    start_button = pg.Rect(w/2 - b_w/2, h/2 - b_h/2 + 120, b_w, b_h)
-    pg.draw.rect(screen, button_color, start_button)
-    font = pg.font.SysFont(button_font, button_text_size)
-    start_text = font.render('Start Game', False, button_text_color)
-    screen.blit(start_text, (start_button.left + 10, start_button.top + 10))
+    start_image = pg.image.load(start_button_img).convert_alpha()
+    start_button = pg.Rect((w/2 - b_w/2, h/2 - b_h/2 + 50), (b_w, b_h))
+    screen.blit(start_image, start_button)
 
-    instr_button = pg.Rect(w/2 - b_w/2, h/2 - b_h/2 + 180, b_w, b_h)
-    pg.draw.rect(screen, button_color, instr_button)
-    font = pg.font.SysFont(button_font, button_text_size)
-    instr_text = font.render('Instructions', False, button_text_color)
-    screen.blit(instr_text, (instr_button.left + 10, instr_button.top + 10))
+    controls_image = pg.image.load(controls_button_img).convert_alpha()
+    instr_button = pg.Rect((w / 2 - b_w / 2, h / 2 - b_h / 2 + 100), (b_w, b_h))
+    screen.blit(controls_image, instr_button)
 
     # Main menu loop
     while True:

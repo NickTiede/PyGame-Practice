@@ -8,6 +8,8 @@ import main_menu
 import instr_menu
 
 # Initializes required modules
+from assets import death_screen
+
 pg.init()
 
 # Creates game window
@@ -15,7 +17,7 @@ screen = pg.display.set_mode((800, 600))
 pg.display.set_caption('Zombie Game')
 
 # Screen currently displayed
-# 'menu', 'instructions', 'game'
+# 'menu', 'instructions', 'game', 'death'
 screen_choice = 'menu'
 
 # Menu loop
@@ -38,4 +40,9 @@ while True:
     # Game loop
     if screen_choice == 'game':
         game.play_game(screen)
+        screen_choice = 'death'
+
+    # Game loop
+    if screen_choice == 'death':
+        death_screen.show(screen)
         screen_choice = 'menu'
